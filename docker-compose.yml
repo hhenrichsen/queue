@@ -1,0 +1,55 @@
+version: '3.6'
+
+services:
+  proxy:
+    image: nginx:latest
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    ports:
+    - "80:80"
+    - "443:443"
+    networks:
+    - queue_internal
+
+  db:
+    image: postgres:latest
+    volumes:
+    - ./pg-data:/var/lib/postgresql/data
+    - ./db/init/:/docker-entrypoint-initdb.d/
+    environment: 
+    - POSTGRES_PASSWORD=queueApp55
+    - POSTGRES_USER=queue
+    - POSTGRES_DB=queue
+    ports:
+    - "5432"
+    networks:
+    - queue_internal
+
+
+  frontend:
+    build: ./frontend
+    ports: 
+    - "8081"
+    environment:
+    - PORT=8081
+    networks:
+    - queue_internal
+
+  api:
+    build: ./api
+    ports:
+    - "8080"
+    environment:
+    - DB_PASSWORD=queueApp55
+    - DB_USERNAME=queue
+    - DB_DATABASE=queue
+    - DB_HOST=db
+    - DB_PORT=5432
+    - QUEUE_PORT=8080
+    - APP_NAME=QueueApp
+    - JWT_KEY=sdfghjkl
+    networks:
+    - queue_internal
+
+networks:
+  queue_internal:
