@@ -5,6 +5,9 @@ services:
     image: nginx:latest
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+    depends_on: 
+    - "frontend"
+    - "api"
     ports:
     - "80:80"
     - "443:443"
@@ -28,6 +31,7 @@ services:
 
   frontend:
     build: ./frontend
+    tty: true
     ports: 
     - "8081"
     environment:
@@ -37,17 +41,20 @@ services:
 
   api:
     build: ./api
+    tty: true
     ports:
     - "8080"
+    depends_on: 
+    - "db"
     environment:
     - DB_PASSWORD=queueApp55
     - DB_USERNAME=queue
     - DB_DATABASE=queue
-    - DB_HOST=db
+    - DB_HOSTNAME=db
     - DB_PORT=5432
     - QUEUE_PORT=8080
     - APP_NAME=QueueApp
-    - JWT_KEY=sdfghjkl
+    - JWT_SECRET=sdfghjkl
     networks:
     - queue_internal
 
